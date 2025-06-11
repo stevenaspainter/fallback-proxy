@@ -1,8 +1,7 @@
 {
   "framework": null,
-  "functions": {
-    "api/index.js": { "runtime": "edge" }
-  },
+  "buildCommand": "",
+  "outputDirectory": "",
   "routes": [
     { "src": "/(.*)", "dest": "api/index.js" }
   ]
