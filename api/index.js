@@ -4,7 +4,7 @@ export default async function handler(req) {
   const url = new URL(req.url);
 
   /* ───────── fetch_links endpoint ───────── */
-  if (url.pathname.endsWith("/fetch_links")) {
+  if (url.searchParams.get("action") === "fetch_links") {
     if (!globalThis.linksCache) {
       globalThis.linksCache = JSON.parse(process.env.LINKS_JSON || "[]");
     }
@@ -16,11 +16,13 @@ export default async function handler(req) {
         r.category.toLowerCase() === category &&
         r.subtype.toLowerCase()  === subtype
     );
+
     return new Response(JSON.stringify(results), {
       status: 200,
       headers: { "content-type": "application/json" }
     });
   }
+
   /* ───────── fallback-logger branch ───────── */
   const q   = url.searchParams.get("question") ?? "No question";
   const src = url.searchParams.get("source")   ?? "GPT";
