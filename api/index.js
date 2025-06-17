@@ -3,7 +3,7 @@ export const config = { runtime: "edge" };
 export default async function handler(req) {
   const url = new URL(req.url);
 
-  /* ───────── fetch_links endpoint ───────── */
+  /* ───── fetch_links (action=fetch_links) ───── */
   if (url.searchParams.get("action") === "fetch_links") {
     if (!globalThis.linksCache) {
       globalThis.linksCache = JSON.parse(process.env.LINKS_JSON || "[]");
@@ -23,7 +23,31 @@ export default async function handler(req) {
     });
   }
 
-  /* ───────── fallback-logger branch ───────── */
+  /* ───── current-sprint endpoint (/current-sprint) ───── */
+  if (url.pathname.endsWith("/current-sprint")) {
+    if (!globalThis.sprintTable) {
+      globalThis.sprintTable = JSON.parse(process.env.SPRINT_CALENDAR_JSON || "[]");
+    }
+    const today = new Date().toISOString().slice(0, 10);         // YYYY-MM-DD
+    const row   = globalThis.sprintTable.find(
+      r => r.start <= today && today <= r.end
+    ) || null;
+
+    return new Response(JSON.stringify(row), {
+      status: 200,
+      headers: { "content-type": "application/json" }
+    });
+  }
+
+  /* ───── current-datetime endpoint (/current-datetime) ───── */
+  if (url.pathname.endsWith("/current-datetime")) {
+    return new Response(
+      JSON.stringify({ datetime: new Date().toISOString() }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  }
+
+  /* ───── fallback logger (default branch) ───── */
   const q   = url.searchParams.get("question") ?? "No question";
   const src = url.searchParams.get("source")   ?? "GPT";
 
